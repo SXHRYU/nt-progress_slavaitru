@@ -5,15 +5,28 @@ app = typer.Typer()
 
 
 @app.command()
-def deposit(client: str, amount: float, description: str = "ATM Deposit"):
-    print(f"{client} depositted ${amount} for '{description}'.")
+def deposit(
+    client_id: str = typer.Argument(..., help="client's ID, on whose account money is to be deposited."),
+    amount: float = typer.Argument(..., help="amount of money to deposit. Minimum: ¢1, Maximum: $1000000 (1 million). "
+            + "Format must include pennies after a 'dot', e.g.: 100.12 OR 0.99 OR 2222.00 OR 0.01."),
+    description: str = typer.Option(default="ATM Deposit", help="description of a deposit action.")
+    ):
+    """Deposits money to a given client."""
+    print(f"{client_id} depositted ${amount} for '{description}'.")
 
 @app.command()
-def withdraw(client: str, amount: float, description: str = "ATM Withdrawal"):
-    print(f"{client} withdrew ${amount} for '{description}'.")
+def withdraw(
+    client_id: str = typer.Argument(..., help="client's ID, from whose account money is to be withdrawn."),
+    amount: float = typer.Argument(..., help="amount of money to withdraw. Minimum: ¢1, Maximum: $1000000 (1 million), "
+            + "but no more than a client has! "
+            + "Format must include pennies after a 'dot', e.g.: `100.12` OR `0.99` OR `2222.00` OR `0.01`."),
+    description: str = typer.Option(default="ATM Withdrawal", help="description of a withdrawal action.")
+    ):
+    """Withdraws money from a given client."""
+    print(f"{client_id} withdrew ${amount} for '{description}'.")
 
 @app.command()
-def show_bank_statement(client: str, since: datetime = None, till: datetime = None):
+def show_bank_statement(client_id: str, since: datetime = None, till: datetime = None):
     print(
             "----------------------------------------------------------------------------------------------------\n"
         +   "| Date                | Description      | Withdrawals     | Deposits          | Balance           |\n"
