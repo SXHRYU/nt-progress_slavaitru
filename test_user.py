@@ -6,12 +6,11 @@ from user import Account, User, AccountCreationError
 from commands import deposit
 
 
-pytest.fixture()
-def mock_user_account_pair() -> Generator:
-    u: User = User("123")
-    a: Account = Account("asd", 0, owner_id="123")
 
 def test_user_creation() -> None:
+    """Tests if the user is created properly
+    and all available fields are filled.
+    """
     u: User = User("123")
     assert u
     assert u.id == "123"
@@ -20,6 +19,9 @@ def test_user_creation() -> None:
     User.users.clear()
 
 def test_account_creation() -> None:
+    """Tests if the user's account is created properly
+    and all available fields are filled.
+    """
     u: User = User("123")
     a: Account = Account("asd", 0, owner_id="123")
     assert a
@@ -32,6 +34,7 @@ def test_account_creation() -> None:
     Account.accounts.clear()
 
 def test_account_exists() -> None:
+    """Tests if the duplicate account cannot be created."""
     u1: User = User("123")
     u2: User = User("456")
     a1: Account = Account("asd", 0, owner_id="123")
@@ -41,6 +44,7 @@ def test_account_exists() -> None:
     Account.accounts.clear()
 
 def test_client_has_account() -> None:
+    """Tests if the account is assigned to a client who has one already."""
     u1: User = User("123")
     u2: User = User("456")
     a1: Account = Account("asd", 0, owner_id="123")
@@ -50,6 +54,9 @@ def test_client_has_account() -> None:
     Account.accounts.clear()
 
 def test_deposit_history() -> None:
+    """Tests if the account's deposit history is formed
+    correctly once.
+    """
     u: User = User("123")
     a: Account = Account("asd", 0, owner_id="123")
 
@@ -60,6 +67,9 @@ def test_deposit_history() -> None:
     Account.accounts.clear()
 
 def test_deposit_balance() -> None:
+    """Tests if the account's balance is formed correctly
+    after one deposit.
+    """
     u: User = User("123")
     a: Account = Account("asd", 0, owner_id="123")
 
@@ -70,6 +80,9 @@ def test_deposit_balance() -> None:
     Account.accounts.clear()
 
 def test_multiple_deposits_history() -> None:
+    """Tests if the deposit history is formed correctly
+    throughout multiple operations.
+    """
     u: User = User("123")
     a: Account = Account("asd", 0, owner_id="123")
 
@@ -89,6 +102,9 @@ def test_multiple_deposits_history() -> None:
     Account.accounts.clear()
 
 def test_multiple_deposits_balance() -> None:
+    """Tests if the account's balance is formed correctly
+    after multiple deposits.
+    """
     u: User = User("123")
     a: Account = Account("asd", 10, owner_id="123")
 
@@ -101,6 +117,7 @@ def test_multiple_deposits_balance() -> None:
     Account.accounts.clear()
 
 def test_deposit_history_balance() -> None:
+    """Tests account's balance and history after multiple deposits."""
     u: User = User("123")
     a: Account = Account("asd", 10, owner_id="123")
 
