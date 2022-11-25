@@ -39,5 +39,3 @@ def test_client_has_account() -> None:
         assert Account("fgh", 0, owner_id="123")
     User.users.clear()
     Account.accounts.clear()
-
-
