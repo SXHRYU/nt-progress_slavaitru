@@ -51,6 +51,7 @@ def deposit(
     print(f"{client_id} depositted ${amount} for '{description}'.")
 
 @app.command()
+@check_validity
 def withdraw(
     client_id: str = typer.Argument(..., help="client's ID, from whose account money is to be withdrawn."),
     amount: float = typer.Argument(..., help="amount of money to withdraw. Minimum: ¢1, Maximum: $1000000 (1 million), "
@@ -59,6 +60,11 @@ def withdraw(
     description: str = typer.Option(default="ATM Withdrawal", help="description of a withdrawal action.")
     ):
     """Withdraws money from a given client. Example: `withdraw 092-VanR0-S 100009.01`"""
+
+    client: User = User.users.get(client_id)
+    withdraw_time: str = str(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+    client.account.history.append((withdraw_time, "w"))
+    client.account.balance -= amount
     print(f"{client_id} withdrew ${amount} for '{description}'.")
 
 @app.command()
