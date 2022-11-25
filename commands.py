@@ -1,4 +1,3 @@
-import argparse
 from datetime import datetime
 import functools
 import typer
@@ -11,8 +10,9 @@ app = typer.Typer()
 
 
 class NegativeAmountError(Exception): ...
-
 class ClientNotFoundError(Exception): ...
+class WrongAmountFormat(Exception): ...
+
 
 def check_validity(command_func):
     @functools.wraps(command_func)
@@ -26,10 +26,16 @@ def check_validity(command_func):
         
         # Just list all the checks here.
         client: User = User.users.get(client_id)
+        if isinstance(amount, int):
+            number_of_decimals: int = 2
+        else:
+            number_of_decimals: int = len(str(amount).split(".")[1])
         if not client:
             raise ClientNotFoundError("Client not found! Try again.")
         elif amount <= 0:
             raise NegativeAmountError("Amount must be positive number (amount > 0)! Try again.")
+        elif number_of_decimals > 2:
+            raise WrongAmountFormat("Amount must have 2 floating point decimals (e.g. `10.95`) or none (e.g. `500`)! Try again.")
         else:
             return command_func(**kwargs)
     return wrapper

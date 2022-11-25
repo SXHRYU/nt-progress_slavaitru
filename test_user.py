@@ -4,7 +4,9 @@ import pytest
 from user import Account, User, AccountCreationError
 from commands import (
     deposit, withdraw, 
-    ClientNotFoundError, NegativeAmountError
+    ClientNotFoundError,
+    NegativeAmountError,
+    WrongAmountFormat,
 )
 
 
@@ -275,3 +277,22 @@ class TestsWithdrawal:
 
         User.users.clear()
         Account.accounts.clear()
+
+class TestsIntegrity:
+    def test_number_of_decimals(self) -> None:
+        """Tests if amount of money entered contains 2 decimals."""
+        u: User = User("123")
+        a: Account = Account("asd", 10, owner_id="123")
+
+        withdraw(client_id="123", amount=10.11)
+        withdraw(client_id="123", amount=0.1)
+        deposit(client_id="123", amount=0.10)
+        withdraw(client_id="123", amount=0.01)
+        deposit(client_id="123", amount=10000.01)
+
+        with pytest.raises(WrongAmountFormat):
+            assert withdraw(client_id="123", amount=10.00111)
+
+        User.users.clear()
+        Account.accounts.clear()
+

@@ -29,7 +29,7 @@ class User:
 class Account:
     accounts: dict[str, Self] = {}
 
-    def __new__(cls, id: str, balance: float = 0.00, *, owner_id: str) -> Self:
+    def __new__(cls, id: str, balance: int = 0, *, owner_id: str) -> Self:
         acc_exists: bool = id in cls.accounts
         client_has_acc: bool = hasattr(User.users[owner_id], "account")
         if acc_exists:
@@ -38,10 +38,10 @@ class Account:
             raise AccountCreationError(f"This client already has account.")
         return super().__new__(cls)
 
-    def __init__(self, id: str, balance: float = 0.00, *, owner_id: str) -> None:
+    def __init__(self, id: str, balance: int = 0, *, owner_id: str) -> None:
         super().__init__()
         self.id: str = id
-        self.balance: float = balance
+        self.balance: int = balance
         self.accounts[id]: Self = self
 
         self.history: list[tuple[datetime, str]] = []
