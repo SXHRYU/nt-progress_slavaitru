@@ -284,14 +284,19 @@ class TestsIntegrity:
         u: User = User("123")
         a: Account = Account("asd", 10, owner_id="123")
 
-        withdraw(client_id="123", amount=10.11)
-        withdraw(client_id="123", amount=0.1)
-        deposit(client_id="123", amount=0.10)
-        withdraw(client_id="123", amount=0.01)
-        deposit(client_id="123", amount=10000.01)
-
-        with pytest.raises(WrongAmountFormat):
-            assert withdraw(client_id="123", amount=10.00111)
+        try:
+            withdraw(client_id="123", amount=10.11)
+            withdraw(client_id="123", amount=0.1)
+            deposit(client_id="123", amount=0.10)
+            withdraw(client_id="123", amount=0.01)
+            deposit(client_id="123", amount=10000.01)
+        except:
+            assert False
+        else:
+            assert True
+        finally:
+            with pytest.raises(WrongAmountFormat):
+                assert withdraw(client_id="123", amount=10.00111)
 
         User.users.clear()
         Account.accounts.clear()
