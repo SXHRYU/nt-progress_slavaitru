@@ -1,4 +1,5 @@
 import datetime
+import time
 from typing import Generator
 import pytest
 from user import Account, User, AccountCreationError
@@ -64,6 +65,60 @@ def test_deposit_balance() -> None:
 
     deposit("123", 10)
     assert a.balance == 10
+
+    User.users.clear()
+    Account.accounts.clear()
+
+def test_multiple_deposits_history() -> None:
+    u: User = User("123")
+    a: Account = Account("asd", 0, owner_id="123")
+
+    first_deposit_time: str = str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+    deposit("123", 10)
+    second_deposit_time: str = str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+    deposit("123", 10)
+    third_deposit_time: str = str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+    deposit("123", 10)
+    assert a.history == [
+        (first_deposit_time, "d"),
+        (second_deposit_time, "d"),
+        (third_deposit_time, "d"),
+    ]    
+
+    User.users.clear()
+    Account.accounts.clear()
+
+def test_multiple_deposits_balance() -> None:
+    u: User = User("123")
+    a: Account = Account("asd", 10, owner_id="123")
+
+    deposit("123", 10)
+    deposit("123", 20.50)
+    deposit("123", 1.50)
+    assert a.balance == 42
+
+    User.users.clear()
+    Account.accounts.clear()
+
+def test_deposit_history_balance() -> None:
+    u: User = User("123")
+    a: Account = Account("asd", 10, owner_id="123")
+
+    first_deposit_time: str = str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+    deposit("123", 10)
+    time.sleep(1)
+    second_deposit_time: str = str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+    deposit("123", 20.50)
+    time.sleep(1)
+    third_deposit_time: str = str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+    deposit("123", 1.50)
+
+    assert a.balance == 42
+    assert a.history == [
+        (first_deposit_time, "d"),
+        (second_deposit_time, "d"),
+        (third_deposit_time, "d"),
+    ]
 
     User.users.clear()
     Account.accounts.clear()
