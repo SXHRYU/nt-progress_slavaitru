@@ -1,6 +1,14 @@
+import datetime
+from typing import Generator
 import pytest
 from user import Account, User, AccountCreationError
+from commands import deposit
 
+
+pytest.fixture()
+def mock_user_account_pair() -> Generator:
+    u: User = User("123")
+    a: Account = Account("asd", 0, owner_id="123")
 
 def test_user_creation() -> None:
     u: User = User("123")
@@ -37,5 +45,25 @@ def test_client_has_account() -> None:
     a1: Account = Account("asd", 0, owner_id="123")
     with pytest.raises(AccountCreationError):
         assert Account("fgh", 0, owner_id="123")
+    User.users.clear()
+    Account.accounts.clear()
+
+def test_deposit_history() -> None:
+    u: User = User("123")
+    a: Account = Account("asd", 0, owner_id="123")
+
+    deposit("123", 10)
+    assert a.history == [(str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")), "d")]
+
+    User.users.clear()
+    Account.accounts.clear()
+
+def test_deposit_balance() -> None:
+    u: User = User("123")
+    a: Account = Account("asd", 0, owner_id="123")
+
+    deposit("123", 10)
+    assert a.balance == 10
+
     User.users.clear()
     Account.accounts.clear()
