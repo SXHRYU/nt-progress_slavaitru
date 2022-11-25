@@ -1,4 +1,6 @@
+import argparse
 from datetime import datetime
+import functools
 import typer
 from rich.console import Console
 from rich.table import Table
@@ -8,7 +10,32 @@ console = Console()
 app = typer.Typer()
 
 
+class NegativeAmountError(Exception): ...
+
+class ClientNotFoundError(Exception): ...
+
+def check_validity(command_func):
+    @functools.wraps(command_func)
+    def wrapper(**kwargs):
+        client_id: str = kwargs["client_id"]
+        amount: float = kwargs["amount"]
+        try:
+            description: str = kwargs["description"]
+        except KeyError:
+            ...
+        
+        # Just list all the checks here.
+        client: User = User.users.get(client_id)
+        if not client:
+            raise ClientNotFoundError("Client not found! Try again.")
+        elif amount <= 0:
+            raise NegativeAmountError("Amount must be positive number (amount > 0)! Try again.")
+        else:
+            return command_func(**kwargs)
+    return wrapper
+
 @app.command()
+@check_validity
 def deposit(
     client_id: str = typer.Argument(..., help="client's ID, on whose account money is to be deposited."),
     amount: float = typer.Argument(..., help="amount of money to deposit. Minimum: ¢1, Maximum: $1000000 (1 million). "
@@ -18,12 +45,9 @@ def deposit(
     """Deposits money to a given client. Example: `deposit 123-NSiw0-X 15421.22`"""
     
     client: User = User.users.get(client_id)
-    if not client:
-        print("Client not found! Try again.")
-    else:
-        deposit_time: str = str(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-        client.account.history.append((deposit_time, "d"))
-        client.account.balance += amount
+    deposit_time: str = str(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+    client.account.history.append((deposit_time, "d"))
+    client.account.balance += amount
     print(f"{client_id} depositted ${amount} for '{description}'.")
 
 @app.command()

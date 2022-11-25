@@ -1,9 +1,8 @@
 import datetime
 import time
-from typing import Generator
 import pytest
 from user import Account, User, AccountCreationError
-from commands import deposit
+from commands import deposit, ClientNotFoundError, NegativeAmountError
 
 
 
@@ -60,7 +59,7 @@ def test_deposit_history() -> None:
     u: User = User("123")
     a: Account = Account("asd", 0, owner_id="123")
 
-    deposit("123", 10)
+    deposit(client_id="123", amount=10)
     assert a.history == [(str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")), "d")]
 
     User.users.clear()
@@ -73,7 +72,7 @@ def test_deposit_balance() -> None:
     u: User = User("123")
     a: Account = Account("asd", 0, owner_id="123")
 
-    deposit("123", 10)
+    deposit(client_id="123", amount=10)
     assert a.balance == 10
 
     User.users.clear()
@@ -87,11 +86,11 @@ def test_multiple_deposits_history() -> None:
     a: Account = Account("asd", 0, owner_id="123")
 
     first_deposit_time: str = str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-    deposit("123", 10)
+    deposit(client_id="123", amount=10)
     second_deposit_time: str = str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-    deposit("123", 10)
+    deposit(client_id="123", amount=10)
     third_deposit_time: str = str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-    deposit("123", 10)
+    deposit(client_id="123", amount=10)
     assert a.history == [
         (first_deposit_time, "d"),
         (second_deposit_time, "d"),
@@ -108,9 +107,9 @@ def test_multiple_deposits_balance() -> None:
     u: User = User("123")
     a: Account = Account("asd", 10, owner_id="123")
 
-    deposit("123", 10)
-    deposit("123", 20.50)
-    deposit("123", 1.50)
+    deposit(client_id="123", amount=10)
+    deposit(client_id="123", amount=20.50)
+    deposit(client_id="123", amount=1.50)
     assert a.balance == 42
 
     User.users.clear()
@@ -122,13 +121,13 @@ def test_deposit_history_balance() -> None:
     a: Account = Account("asd", 10, owner_id="123")
 
     first_deposit_time: str = str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-    deposit("123", 10)
+    deposit(client_id="123", amount=10)
     time.sleep(1)
     second_deposit_time: str = str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-    deposit("123", 20.50)
+    deposit(client_id="123", amount=20.50)
     time.sleep(1)
     third_deposit_time: str = str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-    deposit("123", 1.50)
+    deposit(client_id="123", amount=1.50)
 
     assert a.balance == 42
     assert a.history == [
@@ -139,3 +138,24 @@ def test_deposit_history_balance() -> None:
 
     User.users.clear()
     Account.accounts.clear()
+
+def test_deposit_negative_money() -> None:
+    u: User = User("123")
+    a: Account = Account("asd", 10, owner_id="123")
+
+    with pytest.raises(NegativeAmountError):
+        assert deposit(client_id="123", amount=-10)
+
+    User.users.clear()
+    Account.accounts.clear()
+
+def test_deposit_client_not_found() -> None:
+    u: User = User("123")
+    a: Account = Account("asd", 10, owner_id="123")
+
+    with pytest.raises(ClientNotFoundError):
+        assert deposit(client_id="456", amount=10)
+
+    User.users.clear()
+    Account.accounts.clear()
+
