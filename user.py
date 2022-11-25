@@ -27,7 +27,7 @@ class User:
         return f"User: id='{self.id}'"
 
 class Account:
-    accounts: dict[str, "User"] = {}
+    accounts: dict[str, Self] = {}
 
     def __new__(cls, id: str, balance: float = 0.00, *, owner_id: str) -> Self:
         acc_exists: bool = id in cls.accounts
