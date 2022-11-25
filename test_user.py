@@ -30,7 +30,7 @@ class TestsCreation:
         a: Account = Account("asd", 0, owner_id="123")
         assert a
         assert a.id == "asd"
-        assert a.balance == 0
+        assert a.balance.value == 0
         assert a.history == []
         assert Account.accounts == a.accounts == {a.id: a}
         assert a.owner == u
@@ -300,4 +300,3 @@ class TestsIntegrity:
 
         User.users.clear()
         Account.accounts.clear()
-
