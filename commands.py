@@ -66,7 +66,7 @@ def deposit(client_id: str, amount: float, description: str = "ATM Deposit"):
     
     client: User = User.users.get(client_id)
     deposit_time: str = str(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-    client.account.history.append((deposit_time, "d"))
+    client.account.history.append((deposit_time, "d", amount))
     client.account.balance += amount
     print(f"{client_id} depositted ${amount} for '{description}'.")
 
@@ -82,7 +82,7 @@ def withdraw(client_id: str, amount: float, description: str = "ATM Withdrawal")
     """
     client: User = User.users.get(client_id)
     withdraw_time: str = str(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-    client.account.history.append((withdraw_time, "w"))
+    client.account.history.append((withdraw_time, "w", amount))
     client.account.balance -= amount
     print(f"{client_id} withdrew ${amount} for '{description}'.")
 
@@ -99,6 +99,7 @@ def show_bank_statement(client_id: str, since: datetime = None, till: datetime =
     client: User = User.users.get(client_id)
     table = Table("Date", "Description", "Withdrawals", "Deposits", "Balance")
     table.add_row("", "Previous balance", "", "", f"${client.account._initial_balance}", end_section=True)
+    # for row in client.
     table.add_row("yyyy-mm-dd hh:mnmn:ss", "ATM Deposit", "$100.00", "$100.00")
     table.add_row("yyyy-mm-dd hh:mnmn:ss", "ATM Deposit", "$5_000_000.50", "$5_000_100.50")
     table.add_row("yyyy-mm-dd hh:mnmn:ss", "ATM Withdrawal", "$180_000.00", "", "$4_820_100.50", end_section=True)

@@ -1,10 +1,13 @@
 from datetime import datetime
-from typing import Self
+from typing import Self, TypeAlias
 from rich import print as rprint
 from exceptions import (
     AccountCreationError,
     ClientDoesNotExistError,
 )
+
+
+Operation: TypeAlias = tuple[datetime, str, float]
 
 
 class User:
@@ -52,7 +55,7 @@ class Account:
         self.balance: float = _Balance(balance)
         self.accounts[id]: Self = self
 
-        self.history: list[tuple[datetime, str]] = []
+        self.history: list[Operation] = []
             
         self.owner: User = User.users[owner_id]
         self.owner._set_account(self)
