@@ -1,9 +1,9 @@
 from datetime import datetime
 from typing import Self
-
-
-class AccountCreationError(Exception):
-    ...
+from exceptions import (
+    AccountCreationError,
+    ClientDoesNotExistError,
+)
 
 class User:
     users: dict[str, Self] = {}
@@ -32,10 +32,13 @@ class Account:
     def __new__(cls, id: str, balance: float = 0, *, owner_id: str) -> Self:
         acc_exists: bool = id in cls.accounts
         client_has_acc: bool = hasattr(User.users[owner_id], "account")
+        client_exists: bool = User.users.get(owner_id) is not None
         if acc_exists:
             raise AccountCreationError(f"Account exists.")
         if client_has_acc:
             raise AccountCreationError(f"This client already has account.")
+        if not client_exists:
+            raise ClientDoesNotExistError(f"Client with this ID does not exist.")
         return super().__new__(cls)
 
     def __init__(self, id: str, balance: float = 0, *, owner_id: str) -> None:
@@ -48,6 +51,7 @@ class Account:
             
         self.owner: User = User.users[owner_id]
         self.owner._set_account(self)
+        self._initial_balance: float = balance
 
     def __repr__(self) -> str:
         return f"Account: id='{self.id}', owner='{self.owner}'"
@@ -74,12 +78,14 @@ class _Balance:
         self.value = initial_balance
     
     def __add__(self, other) -> float:
+        other = float(other)
         self.value *= 100
         other *= 100
         result: int = self.value + other
         return result / 100
     
     def __sub__(self, other) -> float:
+        other = float(other)
         self.value *= 100
         other *= 100
         result: int = self.value - other

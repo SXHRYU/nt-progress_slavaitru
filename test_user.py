@@ -2,12 +2,15 @@ import datetime
 import time
 import pytest
 from user import Account, User, AccountCreationError
-from commands import (
-    deposit, withdraw, 
+from commands import deposit, withdraw
+from exceptions import (
     ClientNotFoundError,
     NegativeAmountError,
     WrongAmountFormat,
+    AccountCreationError,
+    ClientDoesNotExistError,
 )
+
 
 
 class TestsCreation:
@@ -300,3 +303,5 @@ class TestsIntegrity:
 
         User.users.clear()
         Account.accounts.clear()
+
+# test if not number
