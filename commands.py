@@ -90,30 +90,77 @@ def show_bank_statement(client_id: str, since: datetime = None, till: datetime =
     """Description: Show all client's operations.
         Args:
             *client_id (text): client's ID, whose transaction history to display."
-            *since (date): from which date to show information. Formats:"
+            *since (date): from which date to show information. Formats (no quotes):"
                 YYYY-MM-DD; YYYY/MM/DD; YYYY-MM-DD HH:MinMin:SS; YYYY/MM/DD HH:MinMin:SS"
-            *till (date): to which date to show information. Formats:"
+                To skip this parameter, enter any symbol.
+            *till (date): to which date to show information. Formats (no quotes):"
                 YYYY-MM-DD; YYYY/MM/DD; YYYY-MM-DD HH:MinMin:SS; YYYY/MM/DD HH:MinMin:SS"
             (If no `since` or `till` date is provided, shows from the very first transaction or until the very last, respectively.)
+            Examples:
+                `show_bank_statement STYB227`
+                `show_bank_statement STYB227 1999-09-30 2022/10/10 20:15:14`
+                (skip `since`) `show_bank_statement STYB227 - 2022/10/10 20:15:14`
+                (skip `till`) `show_bank_statement STYB227 1999-09-30`
+                (skip `till`) `show_bank_statement STYB227 1999-09-30 -`
     """
+    def _transform_to_datetime(date_string: str) -> datetime:
+        # Needed because of different possible date fields.
+        formats = [
+            "%Y-%m-%d %H:%M:%S",     # -> YYYY-MM-DD HH:MinMin:SS
+            "%Y/%m/%d %H:%M:%S",     # -> YYYY/MM/DD HH:MinMin:SS
+            "%Y-%m-%d",              # -> YYYY-MM-DD
+            "%Y/%m/%d",              # -> YYYY/MM/DD
+        ]
+        for format in formats:
+            try:
+                datetime_obj = datetime.strptime(date_string, format)
+            except ValueError:
+                continue
+            else:
+                break
+        else:
+            raise ValueError
+        return datetime_obj
+
+    try:
+        if not since:
+            since = datetime.min
+        else:
+            since = _transform_to_datetime(since)
+    except ValueError:
+        rprint("[blue][bold]since is skipped")
+        since = datetime.min
+    try:
+        if not till:
+            till = datetime.max
+        else:
+            till = _transform_to_datetime(till)
+    except ValueError:
+        rprint("[red]till [white]format should be of following:\n"
+                + "\t*YYYY-MM-DD\n\t*YYYY/MM/DD\n\t*YYYY-MM-DD HH:MinMin:SS\n\t*YYYY/MM/DD HH:MinMin:SS")
+    
     client: User = User.users.get(client_id)
     if not hasattr(client, "account"):
         rprint(f"Client '[bold]{client_id}' [red]doesn't have an account yet!")
     else:
         total_deposit: float = _Balance('0')
         total_withdraw: float = _Balance('0')
+        final_balance: float = _Balance(client.account._initial_balance)
 
         table = Table("Date", "Description", "Withdrawals", "Deposits", "Balance")
         table.add_row("", "Previous balance", "", "", f"${client.account._initial_balance}", end_section=True)
 
         for operation in client.account.history:
-            if operation[1] == "d":
-                table.add_row(operation[0], operation[3], "", f"${operation[2]}", str(operation[4]))
-                total_deposit += float(operation[2])
-            elif operation[1] == "w":
-                table.add_row(operation[0], operation[3], f"${operation[2]}", "", str(operation[4]))
-                total_withdraw += float(operation[2])
-        table.add_row("", "Totals", str(total_withdraw), str(total_deposit), str(client.account.balance))
+            if since < datetime.strptime(operation[0], "%Y-%m-%d %H:%M:%S") < till:
+                if operation[1] == "d":
+                    table.add_row(operation[0], operation[3], "", f"${operation[2]}", str(operation[4]))
+                    total_deposit += float(operation[2])
+                    final_balance += float(operation[2])
+                elif operation[1] == "w":
+                    table.add_row(operation[0], operation[3], f"${operation[2]}", "", str(operation[4]))
+                    total_withdraw += float(operation[2])
+                    final_balance -= float(operation[2])
+        table.add_row("", "Totals", str(total_withdraw), str(total_deposit), str(final_balance))
         console.print(table)
 
 def create_user(client_id: str):
