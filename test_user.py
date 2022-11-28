@@ -5,10 +5,12 @@ from user import Account, User, AccountCreationError
 from commands import deposit, withdraw
 from exceptions import (
     ClientNotFoundError,
+    AccountNotFoundError,
     NegativeAmountError,
     WrongAmountFormat,
     AccountCreationError,
     ClientDoesNotExistError,
+    AccountDoesNotExistError,
 )
 
 
@@ -61,6 +63,14 @@ class TestsAccount:
         User.users.clear()
         Account.accounts.clear()
     
+    def test_client_not_exists(self) -> None:
+        """Tests if the account is assigned to a non-existent user."""
+        u: User = User("123")
+        with pytest.raises(ClientDoesNotExistError):
+            assert Account("asd", 0, owner_id="456")
+        User.users.clear()
+        Account.accounts.clear()
+    
     def test_balance_not_string(self) -> None:
         """Tests if the balance being passed into the account
         is a numerical value.
@@ -85,6 +95,27 @@ class TestsAccount:
         Account.accounts.clear()
 
 class TestsDeposit:
+    def test_deposit_client_not_found(self) -> None:
+        """Tests if client is found."""
+        u: User = User("123")
+        a: Account = Account("asd", 10, owner_id="123")
+
+        with pytest.raises(ClientNotFoundError):
+            assert deposit("456", 10)
+
+        User.users.clear()
+        Account.accounts.clear()
+
+    def test_deposit_client_no_account(self) -> None:
+        """Tests if client is found but he has no account."""
+        u: User = User("123")
+
+        with pytest.raises(AccountDoesNotExistError):
+            assert deposit("123", 10)
+
+        User.users.clear()
+        Account.accounts.clear()
+
     def test_deposit_history(self) -> None:
         """Tests if the account's deposit history is formed
         correctly once.
@@ -183,18 +214,29 @@ class TestsDeposit:
         User.users.clear()
         Account.accounts.clear()
 
-    def test_deposit_client_not_found(self) -> None:
+class TestsWithdrawal:
+    def test_withdraw_client_not_found(self) -> None:
         """Tests if client is found."""
         u: User = User("123")
         a: Account = Account("asd", 10, owner_id="123")
 
         with pytest.raises(ClientNotFoundError):
-            assert deposit("456", 10)
+            assert withdraw("456", 10)
 
         User.users.clear()
         Account.accounts.clear()
 
-class TestsWithdrawal:
+
+    def test_withdraw_client_no_account(self) -> None:
+        """Tests if client is found but he has no account."""
+        u: User = User("123")
+
+        with pytest.raises(AccountDoesNotExistError):
+            assert withdraw("123", 10)
+
+        User.users.clear()
+        Account.accounts.clear()
+
     def test_withdraw_history(self) -> None:
         """Tests if the account's withdraw history is formed
         correctly once.
@@ -293,17 +335,6 @@ class TestsWithdrawal:
         User.users.clear()
         Account.accounts.clear()
 
-    def test_withdraw_client_not_found(self) -> None:
-        """Tests if client is found."""
-        u: User = User("123")
-        a: Account = Account("asd", 10, owner_id="123")
-
-        with pytest.raises(ClientNotFoundError):
-            assert withdraw("456", 10)
-
-        User.users.clear()
-        Account.accounts.clear()
-
 class TestsIntegrity:
     def test_number_of_decimals(self) -> None:
         """Tests if amount of money entered contains 2 decimals."""
@@ -334,3 +365,7 @@ class TestsIntegrity:
 
         with pytest.raises(ValueError):
             assert deposit(123, "dd")
+
+
+t = TestsDeposit()
+t.test_deposit_client_no_account()

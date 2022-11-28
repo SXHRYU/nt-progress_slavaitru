@@ -1,5 +1,6 @@
 from datetime import datetime
 from typing import Self
+from rich import print as rprint
 from exceptions import (
     AccountCreationError,
     ClientDoesNotExistError,
@@ -31,14 +32,17 @@ class Account:
 
     def __new__(cls, id: str, balance: float = 0, *, owner_id: str) -> Self:
         acc_exists: bool = id in cls.accounts
-        client_has_acc: bool = hasattr(User.users[owner_id], "account")
+        client_has_acc: bool = hasattr(User.users.get(owner_id), "account")
         client_exists: bool = User.users.get(owner_id) is not None
         if acc_exists:
-            raise AccountCreationError(f"Account exists.")
-        if client_has_acc:
-            raise AccountCreationError(f"This client already has account.")
+            rprint("Account with this [red]id [white] already exists.")
+            raise AccountCreationError
         if not client_exists:
-            raise ClientDoesNotExistError(f"Client with this ID does not exist.")
+            rprint("Client with this [red]id [white]does not exist.")
+            raise ClientDoesNotExistError
+        if client_has_acc:
+            rprint("This client [red]already has account. [white]Client can have only [bold]one account.")
+            raise AccountCreationError
         return super().__new__(cls)
 
     def __init__(self, id: str, balance: str = 0, *, owner_id: str) -> None:

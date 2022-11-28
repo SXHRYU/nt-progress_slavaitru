@@ -8,6 +8,7 @@ from exceptions import (
     NegativeAmountError,
     ClientNotFoundError,
     AccountNotFoundError,
+    AccountDoesNotExistError,
     WrongAmountFormat,
 )
 
@@ -38,13 +39,16 @@ def check_validity(command_func):
         else:
             number_of_decimals: int = len(str(amount).split(".")[1])
         if not client:
-            rprint(f"[red]Client not found! Try again.")
+            rprint("[red]Client not found! Try again.")
             raise ClientNotFoundError
+        elif not hasattr(client, "account"):
+            rprint("[red]Client doesn't have a bank account! Try again.")
+            raise AccountDoesNotExistError
         elif amount <= 0:
-            rprint(f"[red]amount [white]must be positive number ([red]amount [white]> 0)! Try again.")
+            rprint("[red]amount [white]must be positive number ([red]amount [white]> 0)! Try again.")
             raise NegativeAmountError
         elif number_of_decimals > 2:
-            rprint(f"[red]amount [white]must have 2 floating point decimals (e.g. `10.95`) or none (e.g. `500`)! Try again.")
+            rprint("[red]amount [white]must have 2 floating point decimals (e.g. `10.95`) or none (e.g. `500`)! Try again.")
             raise WrongAmountFormat
         else:
             return command_func(client_id, amount, description)
