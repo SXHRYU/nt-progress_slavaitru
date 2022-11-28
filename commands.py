@@ -21,7 +21,11 @@ def check_validity(command_func):
     @functools.wraps(command_func)
     def wrapper(*args):
         client_id: str = str(args[0])
-        amount: float = float(args[1])
+        try:
+            amount: float = float(args[1])
+        except ValueError:
+            rprint(f"[red]amount [white]must be a numerical value.")
+            raise ValueError
         try:
             description: str = str(args[2])
         except IndexError:
