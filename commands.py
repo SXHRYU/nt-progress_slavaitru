@@ -3,7 +3,6 @@ from datetime import datetime
 from rich import print as rprint
 from rich.console import Console
 from rich.table import Table
-from user import Account, User, _Balance
 from exceptions import (
     NegativeAmountError,
     ClientNotFoundError,
@@ -11,6 +10,8 @@ from exceptions import (
     AccountDoesNotExistError,
     WrongAmountFormat,
 )
+from user import Account, User, _Balance
+
 
 console = Console()
 
