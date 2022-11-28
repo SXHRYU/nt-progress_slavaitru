@@ -140,6 +140,12 @@ def delete_user(client_id: str):
     client: User = User.users.get(client_id)
     if client:
         rprint(f"[red]Deleted user {client}")
+        if hasattr(client, "account"):
+            # technically it'd be better architecture-wise to implement
+            # observer class to detect changes in `Users.user` to delete
+            # the corresponding account on user deletion but I don't
+            # have neither knowledge nor time to do it
+            Account.accounts.pop(client.account.id)
         User.users.pop(client_id)
     else:
         rprint(f"[red]Client not found! Try again.")

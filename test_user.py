@@ -2,7 +2,12 @@ import datetime
 import time
 import pytest
 from user import Account, User, AccountCreationError
-from commands import deposit, withdraw
+from commands import (
+    create_user, create_account,
+    delete_user, delete_account,
+    display_users, display_accounts,
+    deposit, withdraw,
+)
 from exceptions import (
     ClientNotFoundError,
     AccountNotFoundError,
@@ -365,7 +370,90 @@ class TestsIntegrity:
 
         with pytest.raises(ValueError):
             assert deposit(123, "dd")
+        
+        User.users.clear()
+        Account.accounts.clear()
 
+class TestsUtility:
+    """Tests given utility functions from `commands.py`."""
+    def test_create_user(self) -> None:
+        create_user("asd")
+        create_user("qwe")
+        create_user("zxc")
+        assert User.users == {
+            "asd": User.users["asd"],
+            "qwe": User.users["qwe"],
+            "zxc": User.users["zxc"],
+        }
 
-t = TestsDeposit()
-t.test_deposit_client_no_account()
+        User.users.clear()
+        Account.accounts.clear()
+        
+    def test_create_account(self) -> None:
+        u1: User = User("qwe")
+        u2: User = User("asd")
+        u3: User = User("zxc")
+        create_account("123", "qwe")
+        create_account("456", "asd", 100.0)
+        create_account("789", "zxc", 123456.23)
+        assert Account.accounts == {
+            "123": Account.accounts["123"],
+            "456": Account.accounts["456"],
+            "789": Account.accounts["789"],
+        }
+        User.users.clear()
+        Account.accounts.clear()
+
+    def test_delete_user(self) -> None:
+        u1: User = User("qwe")
+        u2: User = User("asd")
+        u3: User = User("zxc")
+        delete_user("qwe")
+        delete_user("zxc")
+        assert User.users == {
+            "asd": User.users["asd"],
+        }
+        User.users.clear()
+        Account.accounts.clear()
+        
+    def test_delete_account(self) -> None:
+        u1: User = User("qwe")
+        u2: User = User("asd")
+        u3: User = User("zxc")
+        a1: Account = Account("123", owner_id="qwe")
+        a2: Account = Account("456", owner_id="asd")
+        a3: Account = Account("789", owner_id="zxc")
+        
+        delete_account("123")
+        delete_account("789")
+        assert Account.accounts == {
+            "456": Account.accounts["456"],
+        }
+        User.users.clear()
+        Account.accounts.clear()
+
+    def test_complex_utility(self) -> None:
+        create_user("qwe")
+        delete_user("qwe")
+        create_user("qwe")
+
+        create_user("asd")
+        create_account("123", "asd")
+
+        create_user("zxc")
+        create_account("456", "zxc")
+        delete_user("zxc")
+
+        delete_account("123")
+        create_account("123", "qwe")
+        
+        assert User.users == {
+            "qwe": User.users["qwe"],
+            "asd": User.users["asd"],
+        }
+        assert Account.accounts == {
+            "123": Account.accounts["123"],
+        }
+
+        User.users.clear()
+        Account.accounts.clear()

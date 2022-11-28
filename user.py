@@ -6,6 +6,7 @@ from exceptions import (
     ClientDoesNotExistError,
 )
 
+
 class User:
     users: dict[str, Self] = {}
 
