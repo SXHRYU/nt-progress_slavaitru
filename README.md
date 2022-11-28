@@ -9,6 +9,12 @@
 
 Необходимо убедиться о наличии [Docker](https://www.docker.com/) на системе.
 
+## Скачать
+
+Перейдите в папку, в которую хотите скачать файлы.
+Перейдите в `PowerShell`/`bash`/`zsh`/`git bash`/другую консоль.
+Введите `git clone https://github.com/SXHRYU/nt-progress_slavaitru`
+
 ### Запуск
 
 `docker build --tag python-slava .`
