@@ -128,8 +128,10 @@ class TestsDeposit:
         u: User = User("123")
         a: Account = Account("asd", 0, owner_id="123")
 
-        deposit("123", 10)
-        assert a.history == [(str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")), "d", 10)]
+        deposit("123", 10, "test1")
+        assert a.history == [
+            (str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")), "d", 10, "test1", "$10.0")
+        ]
 
         User.users.clear()
         Account.accounts.clear()
@@ -142,7 +144,7 @@ class TestsDeposit:
         a: Account = Account("asd", 0, owner_id="123")
 
         deposit("123", 10)
-        assert a.balance == 10
+        assert a.balance.value == 10
 
         User.users.clear()
         Account.accounts.clear()
@@ -159,11 +161,11 @@ class TestsDeposit:
         second_deposit_time: str = str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
         deposit("123", 10)
         third_deposit_time: str = str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-        deposit("123", 10)
+        deposit("123", 10, "test3")
         assert a.history == [
-            (first_deposit_time, "d", 10),
-            (second_deposit_time, "d", 10),
-            (third_deposit_time, "d", 10),
+            (first_deposit_time, "d", 10, "", "$10.0"),
+            (second_deposit_time, "d", 10, "", "$20.0"),
+            (third_deposit_time, "d", 10, "test3", "$30.0"),
         ]    
 
         User.users.clear()
@@ -179,7 +181,7 @@ class TestsDeposit:
         deposit("123", 10)
         deposit("123", 20.50)
         deposit("123", 1.50)
-        assert a.balance == 42
+        assert a.balance.value == 42
 
         User.users.clear()
         Account.accounts.clear()
@@ -198,11 +200,11 @@ class TestsDeposit:
         third_deposit_time: str = str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
         deposit("123", 1.50)
 
-        assert a.balance == 42
+        assert a.balance.value == 42
         assert a.history == [
-            (first_deposit_time, "d", 10),
-            (second_deposit_time, "d", 20.50),
-            (third_deposit_time, "d", 1.50),
+            (first_deposit_time, "d", 10.0, "", "$20.0"),
+            (second_deposit_time, "d", 20.50, "", "$40.5"),
+            (third_deposit_time, "d", 1.50, "", "$42.0"),
         ]
 
         User.users.clear()
@@ -249,8 +251,10 @@ class TestsWithdrawal:
         u: User = User("123")
         a: Account = Account("asd", 100, owner_id="123")
 
-        withdraw("123", 10)
-        assert a.history == [(str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")), "w", 10)]
+        withdraw("123", 10, "test")
+        assert a.history == [
+            (str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")), "w", 10, "test", "$90.0")
+            ]
 
         User.users.clear()
         Account.accounts.clear()
@@ -263,7 +267,7 @@ class TestsWithdrawal:
         a: Account = Account("asd", 10, owner_id="123")
 
         withdraw("123", 10)
-        assert a.balance == 0
+        assert a.balance.value == 0
 
         User.users.clear()
         Account.accounts.clear()
@@ -282,9 +286,9 @@ class TestsWithdrawal:
         third_withdraw_time: str = str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
         withdraw("123", 10)
         assert a.history == [
-            (first_withdraw_time, "w", 10),
-            (second_withdraw_time, "w", 10),
-            (third_withdraw_time, "w", 10),
+            (first_withdraw_time, "w", 10, "", "-$10.0"),
+            (second_withdraw_time, "w", 10, "", "-$20.0"),
+            (third_withdraw_time, "w", 10, "", "-$30.0"),
         ]    
 
         User.users.clear()
@@ -300,7 +304,7 @@ class TestsWithdrawal:
         withdraw("123", 10)
         withdraw("123", 200)
         withdraw("123", 0.01)
-        assert a.balance == 789.99
+        assert a.balance.value == 789.99
 
         User.users.clear()
         Account.accounts.clear()
@@ -311,19 +315,19 @@ class TestsWithdrawal:
         a: Account = Account("asd", 10, owner_id="123")
 
         first_withdraw_time: str = str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-        withdraw("123", 10)
+        withdraw("123", 10, "test1")
         time.sleep(1)
         second_withdraw_time: str = str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-        withdraw("123", 20)
+        withdraw("123", 20, "test2")
         time.sleep(1)
         third_withdraw_time: str = str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-        withdraw("123", 1)
+        withdraw("123", 1, "test1")
 
-        assert a.balance == -21
+        assert a.balance.value == -21
         assert a.history == [
-            (first_withdraw_time, "w", 10),
-            (second_withdraw_time, "w", 20),
-            (third_withdraw_time, "w", 1),
+            (first_withdraw_time, "w", 10, "test1", "$0.0"),
+            (second_withdraw_time, "w", 20, "test2", "-$20.0"),
+            (third_withdraw_time, "w", 1, "test1", "-$21.0"),
         ]
 
         User.users.clear()

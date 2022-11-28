@@ -3,7 +3,7 @@ from datetime import datetime
 from rich import print as rprint
 from rich.console import Console
 from rich.table import Table
-from user import Account, User
+from user import Account, User, _Balance
 from exceptions import (
     NegativeAmountError,
     ClientNotFoundError,
@@ -66,8 +66,8 @@ def deposit(client_id: str, amount: float, description: str = "ATM Deposit"):
     
     client: User = User.users.get(client_id)
     deposit_time: str = str(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-    client.account.history.append((deposit_time, "d", amount))
     client.account.balance += amount
+    client.account.history.append((deposit_time, "d", amount, description, str(client.account.balance)))
     print(f"{client_id} depositted ${amount} for '{description}'.")
 
 @check_validity
@@ -82,8 +82,8 @@ def withdraw(client_id: str, amount: float, description: str = "ATM Withdrawal")
     """
     client: User = User.users.get(client_id)
     withdraw_time: str = str(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-    client.account.history.append((withdraw_time, "w", amount))
     client.account.balance -= amount
+    client.account.history.append((withdraw_time, "w", amount, description, str(client.account.balance)))
     print(f"{client_id} withdrew ${amount} for '{description}'.")
 
 def show_bank_statement(client_id: str, since: datetime = None, till: datetime = None):
@@ -97,14 +97,24 @@ def show_bank_statement(client_id: str, since: datetime = None, till: datetime =
             (If no `since` or `till` date is provided, shows from the very first transaction or until the very last, respectively.)
     """
     client: User = User.users.get(client_id)
-    table = Table("Date", "Description", "Withdrawals", "Deposits", "Balance")
-    table.add_row("", "Previous balance", "", "", f"${client.account._initial_balance}", end_section=True)
-    # for row in client.
-    table.add_row("yyyy-mm-dd hh:mnmn:ss", "ATM Deposit", "$100.00", "$100.00")
-    table.add_row("yyyy-mm-dd hh:mnmn:ss", "ATM Deposit", "$5_000_000.50", "$5_000_100.50")
-    table.add_row("yyyy-mm-dd hh:mnmn:ss", "ATM Withdrawal", "$180_000.00", "", "$4_820_100.50", end_section=True)
-    table.add_row("", "Totals", "$180_000.00", "$5_000_100.50", "$4_821_000.50")
-    console.print(table)
+    if not hasattr(client, "account"):
+        rprint(f"Client '[bold]{client_id}' [red]doesn't have an account yet!")
+    else:
+        total_deposit: float = _Balance('0')
+        total_withdraw: float = _Balance('0')
+
+        table = Table("Date", "Description", "Withdrawals", "Deposits", "Balance")
+        table.add_row("", "Previous balance", "", "", f"${client.account._initial_balance}", end_section=True)
+
+        for operation in client.account.history:
+            if operation[1] == "d":
+                table.add_row(operation[0], operation[3], "", f"${operation[2]}", str(operation[4]))
+                total_deposit += float(operation[2])
+            elif operation[1] == "w":
+                table.add_row(operation[0], operation[3], f"${operation[2]}", "", str(operation[4]))
+                total_withdraw += float(operation[2])
+        table.add_row("", "Totals", str(total_withdraw), str(total_deposit), str(client.account.balance))
+        console.print(table)
 
 def create_user(client_id: str):
     """Description: Creates a user (client) with given `client_id`.
@@ -112,8 +122,9 @@ def create_user(client_id: str):
         Args:
             *client_id (text): create user with this ID.
     """
-    print(f"Created client: {client_id}")
-    return User(client_id)
+    u: User = User(client_id)
+    rprint(f"Created client: [bold]{u}")
+    return u
 
 def create_account(account_id: str, client_id: str,
                     balance: float = 0):
@@ -130,6 +141,7 @@ def create_account(account_id: str, client_id: str,
     except (ValueError, TypeError):
         rprint(f"[red]balance [white]must be a number! Try again.")
     else:
+        rprint(f"Created account: [bold]{a}")
         return a
 
 def delete_user(client_id: str):

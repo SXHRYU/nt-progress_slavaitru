@@ -7,8 +7,10 @@ from exceptions import (
 )
 
 
-Operation: TypeAlias = tuple[datetime, str, float]
-
+# It would be better to actually make it into a class,
+# but I realised it too late, and I'd have to rethink and redo a major
+# part of the task for it.
+Operation: TypeAlias = tuple[datetime, str, float, str, "_Balance"]
 
 class User:
     users: dict[str, Self] = {}
@@ -90,11 +92,19 @@ class _Balance:
         self.value *= 100
         other *= 100
         result: int = self.value + other
-        return result / 100
+        new_balance = _Balance(str(result / 100))
+        return new_balance
     
     def __sub__(self, other) -> float:
         other = float(other)
         self.value *= 100
         other *= 100
         result: int = self.value - other
-        return result / 100
+        new_balance = _Balance(str(result / 100))
+        return new_balance
+    
+    def __str__(self) -> str:
+        if self.value < 0:
+            return f"-${-self.value}"
+        else:
+            return f"${self.value}"
