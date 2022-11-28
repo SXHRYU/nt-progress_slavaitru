@@ -12,7 +12,8 @@
 ### Запуск
 
 `docker build --tag python-slava .`
-`docker run python-slava`
+`docker run -it python-slava`
+**Примечание**: Обязательно укажите флаг `-it`, поскольку это интерактивное приложение, для которого нужен ввод с клавиатуры.
 
 ### Команды
 
