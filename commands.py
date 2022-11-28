@@ -34,11 +34,14 @@ def check_validity(command_func):
         else:
             number_of_decimals: int = len(str(amount).split(".")[1])
         if not client:
-            raise ClientNotFoundError("Client not found! Try again.")
+            rprint(f"[red]Client not found! Try again.")
+            raise ClientNotFoundError
         elif amount <= 0:
-            raise NegativeAmountError("Amount must be positive number (amount > 0)! Try again.")
+            rprint(f"[red]amount [white]must be positive number ([red]amount [white]> 0)! Try again.")
+            raise NegativeAmountError
         elif number_of_decimals > 2:
-            raise WrongAmountFormat("Amount must have 2 floating point decimals (e.g. `10.95`) or none (e.g. `500`)! Try again.")
+            rprint(f"[red]amount [white]must have 2 floating point decimals (e.g. `10.95`) or none (e.g. `500`)! Try again.")
+            raise WrongAmountFormat
         else:
             return command_func(client_id, amount, description)
     return wrapper
@@ -69,7 +72,6 @@ def withdraw(client_id: str, amount: float, description: str = "ATM Withdrawal")
                 Format must include pennies after a 'dot', e.g.: `100.12` OR `0.99` OR `2222.00` OR `0.01`."
             *description (text, optional): description of a withdrawal action. [default="ATM Withdrawal"]
     """
-
     client: User = User.users.get(client_id)
     withdraw_time: str = str(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
     client.account.history.append((withdraw_time, "w"))
@@ -114,8 +116,12 @@ def create_account(account_id: str, client_id: str,
             *balance (float, optional): initial balance of this account. [default=0]
                 Format must include pennies after a 'dot', e.g.: 100.12 OR 0.99 OR 2222.00 OR 0.01.
     """
-    print(f"Created account: {account_id}")
-    return Account(account_id, balance, owner_id=client_id)
+    try:
+        a: Account = Account(account_id, balance, owner_id=client_id)
+    except (ValueError, TypeError):
+        rprint(f"[red]balance [white]must be a number! Try again.")
+    else:
+        return a
 
 def delete_user(client_id: str):
     """Description: Deletes user from database.
@@ -128,7 +134,8 @@ def delete_user(client_id: str):
         rprint(f"[red]Deleted user {client}")
         User.users.pop(client_id)
     else:
-        raise ClientNotFoundError("Client not found! Try again.")
+        rprint(f"[red]Client not found! Try again.")
+        raise ClientNotFoundError
 
 def delete_account(account_id: str):
     """Description: Deletes bank account from database.
@@ -141,7 +148,8 @@ def delete_account(account_id: str):
         rprint(f"[red]Deleted account {account}")
         Account.accounts.pop(account_id)
     else:
-        raise AccountNotFoundError("Account not found! Try again.")
+        rprint(f"[red]Account not found! Try again.")
+        raise AccountNotFoundError
 
 def display_users():
     """Description: Displays all registered (created) users.

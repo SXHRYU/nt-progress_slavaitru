@@ -41,10 +41,10 @@ class Account:
             raise ClientDoesNotExistError(f"Client with this ID does not exist.")
         return super().__new__(cls)
 
-    def __init__(self, id: str, balance: float = 0, *, owner_id: str) -> None:
+    def __init__(self, id: str, balance: str = 0, *, owner_id: str) -> None:
         super().__init__()
         self.id: str = id
-        self.balance: int = _Balance(balance)
+        self.balance: float = _Balance(balance)
         self.accounts[id]: Self = self
 
         self.history: list[tuple[datetime, str]] = []
@@ -74,8 +74,8 @@ class _Balance:
         *$521.92 + $13.21 = $521.92 * ¢100 + $13.21 * 100¢ = ¢52192 + ¢1321 =
             = ¢53513 = $535.13
     """
-    def __init__(self, initial_balance: int) -> None:
-        self.value = initial_balance
+    def __init__(self, initial_balance: str) -> None:
+        self.value: float = float(initial_balance)
     
     def __add__(self, other) -> float:
         other = float(other)

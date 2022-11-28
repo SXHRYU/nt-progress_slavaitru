@@ -60,6 +60,26 @@ class TestsAccount:
             assert Account("fgh", 0, owner_id="123")
         User.users.clear()
         Account.accounts.clear()
+    
+    def test_balance_not_string(self) -> None:
+        """Tests if the balance being passed into the account
+        is a numerical value.
+        """
+        u: User = User("123")
+        with pytest.raises(ValueError):
+            assert Account("asd", "lkjhg", owner_id="123")
+        
+    def test_balance_not_sequence(self) -> None:
+        """Tests if the balance being passed into the account
+        is a numerical value.
+        """
+        u: User = User("123")
+        with pytest.raises(TypeError):
+            assert Account("asd", [1000], owner_id="123")
+            assert Account("asd", (1000), owner_id="123")
+            assert Account("asd", set(1000), owner_id="123")
+            assert Account("asd", {1000: None}, owner_id="123")
+
 
 class TestsDeposit:
     def test_deposit_history(self) -> None:
@@ -304,8 +324,10 @@ class TestsIntegrity:
         User.users.clear()
         Account.accounts.clear()
 
-# test if not number
+    # def test_if_number(self) -> None:
+    #     """Tests if number was actually passed into operations."""
+    #     u: User = User("123")
+    #     a: Account = Account("asd", 10, owner_id="123")
 
-
-t = TestsDeposit()
-t.test_deposit_history()
+    #     with pytest.raises(TypeError):
+    #         assert 
