@@ -69,7 +69,7 @@ class TestsDeposit:
         u: User = User("123")
         a: Account = Account("asd", 0, owner_id="123")
 
-        deposit(client_id="123", amount=10)
+        deposit("123", 10)
         assert a.history == [(str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")), "d")]
 
         User.users.clear()
@@ -82,7 +82,7 @@ class TestsDeposit:
         u: User = User("123")
         a: Account = Account("asd", 0, owner_id="123")
 
-        deposit(client_id="123", amount=10)
+        deposit("123", 10)
         assert a.balance == 10
 
         User.users.clear()
@@ -96,11 +96,11 @@ class TestsDeposit:
         a: Account = Account("asd", 0, owner_id="123")
 
         first_deposit_time: str = str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-        deposit(client_id="123", amount=10)
+        deposit("123", 10)
         second_deposit_time: str = str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-        deposit(client_id="123", amount=10)
+        deposit("123", 10)
         third_deposit_time: str = str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-        deposit(client_id="123", amount=10)
+        deposit("123", 10)
         assert a.history == [
             (first_deposit_time, "d"),
             (second_deposit_time, "d"),
@@ -117,9 +117,9 @@ class TestsDeposit:
         u: User = User("123")
         a: Account = Account("asd", 10, owner_id="123")
 
-        deposit(client_id="123", amount=10)
-        deposit(client_id="123", amount=20.50)
-        deposit(client_id="123", amount=1.50)
+        deposit("123", 10)
+        deposit("123", 20.50)
+        deposit("123", 1.50)
         assert a.balance == 42
 
         User.users.clear()
@@ -131,13 +131,13 @@ class TestsDeposit:
         a: Account = Account("asd", 10, owner_id="123")
 
         first_deposit_time: str = str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-        deposit(client_id="123", amount=10)
+        deposit("123", 10)
         time.sleep(1)
         second_deposit_time: str = str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-        deposit(client_id="123", amount=20.50)
+        deposit("123", 20.50)
         time.sleep(1)
         third_deposit_time: str = str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-        deposit(client_id="123", amount=1.50)
+        deposit("123", 1.50)
 
         assert a.balance == 42
         assert a.history == [
@@ -155,7 +155,7 @@ class TestsDeposit:
         a: Account = Account("asd", 10, owner_id="123")
 
         with pytest.raises(NegativeAmountError):
-            assert deposit(client_id="123", amount=-10)
+            assert deposit("123", -10)
 
         User.users.clear()
         Account.accounts.clear()
@@ -166,7 +166,7 @@ class TestsDeposit:
         a: Account = Account("asd", 10, owner_id="123")
 
         with pytest.raises(ClientNotFoundError):
-            assert deposit(client_id="456", amount=10)
+            assert deposit("456", 10)
 
         User.users.clear()
         Account.accounts.clear()
@@ -179,7 +179,7 @@ class TestsWithdrawal:
         u: User = User("123")
         a: Account = Account("asd", 100, owner_id="123")
 
-        withdraw(client_id="123", amount=10)
+        withdraw("123", 10)
         assert a.history == [(str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")), "w")]
 
         User.users.clear()
@@ -192,7 +192,7 @@ class TestsWithdrawal:
         u: User = User("123")
         a: Account = Account("asd", 10, owner_id="123")
 
-        withdraw(client_id="123", amount=10)
+        withdraw("123", 10)
         assert a.balance == 0
 
         User.users.clear()
@@ -206,11 +206,11 @@ class TestsWithdrawal:
         a: Account = Account("asd", 0, owner_id="123")
 
         first_withdraw_time: str = str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-        withdraw(client_id="123", amount=10)
+        withdraw("123", 10)
         second_withdraw_time: str = str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-        withdraw(client_id="123", amount=10)
+        withdraw("123", 10)
         third_withdraw_time: str = str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-        withdraw(client_id="123", amount=10)
+        withdraw("123", 10)
         assert a.history == [
             (first_withdraw_time, "w"),
             (second_withdraw_time, "w"),
@@ -227,9 +227,9 @@ class TestsWithdrawal:
         u: User = User("123")
         a: Account = Account("asd", 1000, owner_id="123")
 
-        withdraw(client_id="123", amount=10)
-        withdraw(client_id="123", amount=200)
-        withdraw(client_id="123", amount=0.01)
+        withdraw("123", 10)
+        withdraw("123", 200)
+        withdraw("123", 0.01)
         assert a.balance == 789.99
 
         User.users.clear()
@@ -241,13 +241,13 @@ class TestsWithdrawal:
         a: Account = Account("asd", 10, owner_id="123")
 
         first_withdraw_time: str = str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-        withdraw(client_id="123", amount=10)
+        withdraw("123", 10)
         time.sleep(1)
         second_withdraw_time: str = str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-        withdraw(client_id="123", amount=20)
+        withdraw("123", 20)
         time.sleep(1)
         third_withdraw_time: str = str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-        withdraw(client_id="123", amount=1)
+        withdraw("123", 1)
 
         assert a.balance == -21
         assert a.history == [
@@ -265,7 +265,7 @@ class TestsWithdrawal:
         a: Account = Account("asd", 10, owner_id="123")
 
         with pytest.raises(NegativeAmountError):
-            assert withdraw(client_id="123", amount=-10)
+            assert withdraw("123", -10)
 
         User.users.clear()
         Account.accounts.clear()
@@ -276,7 +276,7 @@ class TestsWithdrawal:
         a: Account = Account("asd", 10, owner_id="123")
 
         with pytest.raises(ClientNotFoundError):
-            assert withdraw(client_id="456", amount=10)
+            assert withdraw("456", 10)
 
         User.users.clear()
         Account.accounts.clear()
@@ -288,20 +288,24 @@ class TestsIntegrity:
         a: Account = Account("asd", 10, owner_id="123")
 
         try:
-            withdraw(client_id="123", amount=10.11)
-            withdraw(client_id="123", amount=0.1)
-            deposit(client_id="123", amount=0.10)
-            withdraw(client_id="123", amount=0.01)
-            deposit(client_id="123", amount=10000.01)
+            withdraw("123", 10.11)
+            withdraw("123", 0.1)
+            deposit("123", 0.10)
+            withdraw("123", 0.01)
+            deposit("123", 10000.01)
         except:
             assert False
         else:
             assert True
         finally:
             with pytest.raises(WrongAmountFormat):
-                assert withdraw(client_id="123", amount=10.00111)
+                assert withdraw("123", 10.00111)
 
         User.users.clear()
         Account.accounts.clear()
 
 # test if not number
+
+
+t = TestsDeposit()
+t.test_deposit_history()

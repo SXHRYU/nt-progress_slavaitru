@@ -24,8 +24,8 @@ def check_validity(command_func):
         amount: float = float(args[1])
         try:
             description: str = str(args[2])
-        except ValueError:
-            ...
+        except IndexError:
+            description: str = ""
         
         # Just list all the checks here.
         client: User = User.users.get(client_id)
